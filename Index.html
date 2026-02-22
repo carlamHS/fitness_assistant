@@ -1,0 +1,2123 @@
+<!doctype html>
+<html>
+  <head>
+    <base target="_top" />
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>NG Fitness Assistant</title>
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700&family=IBM+Plex+Mono:wght@500&display=swap"
+    />
+    <style>
+      :root {
+        --text-scale: 1;
+        --bg-1: #f6f2e8;
+        --bg-2: #e8f4eb;
+        --bg-3: #fdf9f0;
+        --card: rgba(255, 255, 255, 0.84);
+        --text: #1f2a26;
+        --muted: #5c6e67;
+        --primary: #0a7a4d;
+        --primary-strong: #055535;
+        --accent: #d26e1d;
+        --line: rgba(20, 52, 41, 0.12);
+        --line-strong: rgba(20, 52, 41, 0.24);
+        --shadow: 0 20px 55px rgba(23, 61, 43, 0.14);
+        --danger: #b43f23;
+      }
+
+      html {
+        font-size: calc(16px * var(--text-scale));
+        -webkit-text-size-adjust: 100%;
+        text-size-adjust: 100%;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        color: var(--text);
+        font-family: "Sora", sans-serif;
+        background:
+          radial-gradient(circle at 6% 15%, rgba(210, 110, 29, 0.2) 0, transparent 24%),
+          radial-gradient(circle at 92% 10%, rgba(10, 122, 77, 0.18) 0, transparent 22%),
+          linear-gradient(145deg, var(--bg-1), var(--bg-2) 44%, var(--bg-3));
+      }
+
+      .wrap {
+        max-width: 1120px;
+        margin: 28px auto;
+        padding: 18px;
+      }
+
+      .hero {
+        display: flex;
+        justify-content: space-between;
+        gap: 16px;
+        align-items: center;
+        margin-bottom: 14px;
+        animation: rise 450ms ease-out;
+      }
+
+      .hero h1 {
+        margin: 0;
+        font-size: clamp(1.6rem, 3.2vw, 2.1rem);
+      }
+
+      .sub {
+        margin: 5px 0 0;
+        color: var(--muted);
+      }
+
+      .review-date {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+      }
+
+      .grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 14px;
+      }
+
+      .app-section {
+        margin-top: 14px;
+      }
+
+      .toolbar-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 12px;
+        align-items: stretch;
+      }
+
+      .control-panel {
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        background: rgba(255, 255, 255, 0.72);
+        padding: 10px;
+      }
+
+      .control-panel .label {
+        margin-top: 0;
+      }
+
+      .control-panel .hint {
+        margin: 8px 0 0;
+      }
+
+      .mode-switch {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+      }
+
+      .mode-btn {
+        border: 1px solid var(--line-strong);
+        background: #fff;
+        color: var(--text);
+        border-radius: 11px;
+        padding: 11px 10px;
+        min-height: 46px;
+        font: inherit;
+        font-weight: 700;
+        cursor: pointer;
+      }
+
+      .mode-btn.active {
+        background: linear-gradient(118deg, var(--primary), var(--primary-strong));
+        border-color: transparent;
+        color: #fff;
+      }
+
+      .card {
+        border: 1px solid var(--line);
+        background: var(--card);
+        box-shadow: var(--shadow);
+        border-radius: 18px;
+        padding: 16px;
+        backdrop-filter: blur(4px);
+        animation: rise 480ms ease-out both;
+      }
+
+      .card h2 {
+        margin: 0 0 11px;
+        font-size: 1.08rem;
+      }
+
+      .label {
+        display: block;
+        font-size: 0.86rem;
+        color: var(--muted);
+        margin: 11px 0 5px;
+      }
+
+      .input,
+      .btn {
+        width: 100%;
+        border: 1px solid var(--line);
+        border-radius: 11px;
+        padding: 12px 12px;
+        font: inherit;
+        font-size: 1rem;
+        color: inherit;
+        background: #fff;
+      }
+
+      .input:focus {
+        outline: 2px solid rgba(10, 122, 77, 0.35);
+        border-color: var(--primary);
+      }
+
+      .btn {
+        margin-top: 14px;
+        background: linear-gradient(118deg, var(--primary), var(--primary-strong));
+        border: 0;
+        color: #fff;
+        font-weight: 700;
+        min-height: 46px;
+        cursor: pointer;
+      }
+
+      .btn:hover {
+        filter: brightness(1.04);
+      }
+
+      .btn-secondary {
+        background: #f4f7f5;
+        color: var(--text);
+        border: 1px solid var(--line-strong);
+      }
+
+      .btn-secondary:hover {
+        background: #ecf2ee;
+        filter: none;
+      }
+
+      .btn-danger {
+        background: #fdf1ed;
+        color: var(--danger);
+        border: 1px solid rgba(180, 63, 35, 0.24);
+      }
+
+      .btn-danger:hover {
+        background: #fae7e0;
+        filter: none;
+      }
+
+      .button-row {
+        display: flex;
+        gap: 8px;
+      }
+
+      .button-row .btn {
+        margin-top: 14px;
+      }
+
+      .row {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 9px;
+      }
+
+      .mode-fields {
+        margin-top: 2px;
+        padding-top: 2px;
+      }
+
+      .quick-picks {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-top: 8px;
+      }
+
+      .quick-chip {
+        border: 1px solid var(--line-strong);
+        background: rgba(255, 255, 255, 0.92);
+        color: var(--text);
+        border-radius: 999px;
+        padding: 7px 12px;
+        font: inherit;
+        font-size: 0.84rem;
+        line-height: 1.2;
+        cursor: pointer;
+      }
+
+      .quick-chip:hover {
+        background: #f2f8f5;
+      }
+
+      .desktop-only {
+        display: block;
+      }
+
+      .mobile-only {
+        display: none;
+      }
+
+      .mobile-list {
+        display: grid;
+        gap: 10px;
+      }
+
+      .mobile-item {
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        background: rgba(255, 255, 255, 0.76);
+        padding: 10px;
+      }
+
+      .mobile-item-top {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .mobile-item-title {
+        font-weight: 600;
+      }
+
+      .mobile-item-meta {
+        margin-top: 6px;
+        color: var(--muted);
+        font-size: 0.84rem;
+      }
+
+      .mobile-item-actions {
+        display: flex;
+        gap: 8px;
+        margin-top: 8px;
+      }
+
+      .stats {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 10px;
+        margin: 14px 0;
+      }
+
+      .stat {
+        border-radius: 14px;
+        border: 1px solid var(--line);
+        background: rgba(255, 255, 255, 0.66);
+        padding: 12px;
+      }
+
+      .stat .k {
+        font-family: "IBM Plex Mono", monospace;
+        font-size: 1.35rem;
+        color: var(--primary-strong);
+      }
+
+      .stat .t {
+        margin-top: 4px;
+        color: var(--muted);
+        font-size: 0.83rem;
+      }
+
+      .table-wrap {
+        overflow: auto;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.92rem;
+      }
+
+      th,
+      td {
+        border-bottom: 1px solid var(--line);
+        text-align: left;
+        padding: 8px 6px;
+        vertical-align: top;
+      }
+
+      th {
+        color: var(--muted);
+        font-size: 0.8rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+      }
+
+      .total {
+        margin-top: 12px;
+        font-weight: 700;
+        color: var(--primary-strong);
+      }
+
+      .pill {
+        display: inline-block;
+        background: rgba(210, 110, 29, 0.14);
+        color: #7e430f;
+        border-radius: 999px;
+        padding: 2px 10px;
+        font-size: 0.78rem;
+      }
+
+      .hint {
+        font-size: 0.82rem;
+        color: var(--muted);
+      }
+
+      .mode-note {
+        margin: 0;
+      }
+
+      .actions {
+        white-space: nowrap;
+      }
+
+      .btn-inline {
+        border: 1px solid var(--line-strong);
+        background: #fff;
+        border-radius: 8px;
+        padding: 4px 8px;
+        font-size: 0.78rem;
+        cursor: pointer;
+        margin-right: 4px;
+      }
+
+      .btn-inline:hover {
+        background: #f2f8f5;
+      }
+
+      .btn-inline.danger {
+        border-color: rgba(180, 63, 35, 0.24);
+        color: var(--danger);
+      }
+
+      .btn-inline.danger:hover {
+        background: #fbefea;
+      }
+
+      .chart-canvas {
+        width: 100%;
+        height: 220px;
+        border-radius: 10px;
+        border: 1px solid var(--line);
+        background: linear-gradient(180deg, rgba(255, 255, 255, 0.8), rgba(247, 250, 248, 0.7));
+      }
+
+      .chart-foot {
+        margin-top: 8px;
+        color: var(--muted);
+        font-size: 0.8rem;
+      }
+
+      .toast {
+        position: fixed;
+        right: 14px;
+        bottom: 14px;
+        max-width: 340px;
+        color: #fff;
+        background: #1b3c2f;
+        padding: 12px 14px;
+        border-radius: 10px;
+        box-shadow: var(--shadow);
+        opacity: 0;
+        transform: translateY(16px);
+        transition: 180ms ease;
+        pointer-events: none;
+      }
+
+      .toast.show {
+        opacity: 1;
+        transform: translateY(0);
+      }
+
+      .mobile-nav {
+        display: none;
+      }
+
+      .mobile-nav-btn {
+        border: 1px solid var(--line-strong);
+        background: #fff;
+        color: var(--text);
+        border-radius: 12px;
+        min-height: 48px;
+        font: inherit;
+        font-weight: 700;
+        cursor: pointer;
+      }
+
+      .mobile-nav-btn.active {
+        background: linear-gradient(118deg, var(--primary), var(--primary-strong));
+        border-color: transparent;
+        color: #fff;
+      }
+
+      .loading {
+        display: none;
+        margin-top: 8px;
+        color: var(--muted);
+        font-size: 0.85rem;
+      }
+
+      .loading.show {
+        display: block;
+      }
+
+      @keyframes rise {
+        from {
+          opacity: 0;
+          transform: translateY(12px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      @media (max-width: 880px) {
+        .wrap {
+          margin: 10px auto;
+          padding: 12px;
+        }
+
+        .grid {
+          grid-template-columns: 1fr;
+        }
+        .stats {
+          grid-template-columns: 1fr;
+        }
+        .row {
+          grid-template-columns: 1fr;
+        }
+        .hero {
+          flex-direction: column;
+          align-items: flex-start;
+        }
+
+        .review-date {
+          width: 100%;
+        }
+
+        .review-date .input {
+          width: 100%;
+        }
+
+        .button-row {
+          flex-direction: column;
+        }
+
+        .toolbar-grid {
+          grid-template-columns: 1fr;
+          gap: 10px;
+        }
+
+        .mode-switch {
+          grid-template-columns: 1fr;
+        }
+
+        .desktop-only {
+          display: none;
+        }
+
+        .mobile-only {
+          display: block;
+        }
+
+        .btn-inline {
+          padding: 8px 10px;
+          font-size: 0.84rem;
+        }
+
+        .chart-canvas {
+          height: 200px;
+        }
+      }
+
+      body.mobile-like .wrap {
+        margin: 10px auto;
+        padding: 12px;
+      }
+
+      body.mobile-like .grid {
+        grid-template-columns: 1fr;
+      }
+
+      body.mobile-like .stats {
+        grid-template-columns: 1fr;
+      }
+
+      body.mobile-like .row {
+        grid-template-columns: 1fr;
+      }
+
+      body.mobile-like .hero {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      body.mobile-like .review-date {
+        width: 100%;
+      }
+
+      body.mobile-like .review-date .input {
+        width: 100%;
+      }
+
+      body.mobile-like .button-row {
+        flex-direction: column;
+      }
+
+      body.mobile-like .toolbar-grid {
+        grid-template-columns: 1fr;
+        gap: 10px;
+      }
+
+      body.mobile-like .mode-switch {
+        grid-template-columns: 1fr;
+      }
+
+      body.mobile-like .desktop-only {
+        display: none;
+      }
+
+      body.mobile-like .mobile-only {
+        display: block;
+      }
+
+      body.mobile-like .btn-inline {
+        padding: 8px 10px;
+        font-size: 0.84rem;
+      }
+
+      body.mobile-like .chart-canvas {
+        height: 200px;
+      }
+
+      body.mobile-like .hero h1 {
+        font-size: clamp(2rem, 7vw, 2.5rem);
+      }
+
+      body.mobile-like .sub {
+        font-size: 1.1rem;
+      }
+
+      body.mobile-like .card h2 {
+        font-size: 1.3rem;
+      }
+
+      body.mobile-like .label {
+        font-size: 1rem;
+      }
+
+      body.mobile-like .hint,
+      body.mobile-like .chart-foot,
+      body.mobile-like .mode-note {
+        font-size: 0.98rem;
+      }
+
+      body.mobile-like .input,
+      body.mobile-like .btn,
+      body.mobile-like .mode-btn {
+        font-size: 1.06rem;
+        min-height: 52px;
+      }
+
+      body.mobile-like .stat .k {
+        font-size: 1.8rem;
+      }
+
+      body.mobile-like .stat .t,
+      body.mobile-like .mobile-item-meta,
+      body.mobile-like th,
+      body.mobile-like td {
+        font-size: 1rem;
+      }
+
+      body.mobile-like .pill {
+        font-size: 0.92rem;
+      }
+
+      body.mobile-like .quick-picks {
+        gap: 10px;
+      }
+
+      body.mobile-like .quick-chip {
+        font-size: 1rem;
+        min-height: 46px;
+        padding: 10px 14px;
+      }
+
+      body.mobile-like .wrap {
+        padding-bottom: 92px;
+      }
+
+      body.mobile-like .mobile-nav {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 8px;
+        position: fixed;
+        left: 10px;
+        right: 10px;
+        bottom: 10px;
+        z-index: 70;
+        padding: 8px;
+        border-radius: 14px;
+        border: 1px solid var(--line);
+        background: rgba(255, 255, 255, 0.92);
+        box-shadow: 0 10px 28px rgba(17, 45, 35, 0.2);
+        backdrop-filter: blur(8px);
+      }
+    </style>
+  </head>
+  <body>
+    <main class="wrap">
+      <section id="heroSection" class="hero">
+        <div>
+          <h1>NG Fitness Assistant</h1>
+          <p class="sub">Track workouts and protein intake in one sheet-backed dashboard.</p>
+        </div>
+        <div class="review-date">
+          <label for="reviewDate" class="hint">Review date</label>
+          <input id="reviewDate" class="input" type="date" />
+        </div>
+      </section>
+
+      <section id="statsSection" class="stats app-section">
+        <article class="stat">
+          <div id="statProtein" class="k">0 g</div>
+          <div class="t">Daily protein total</div>
+        </article>
+        <article class="stat">
+          <div id="statWorkouts" class="k">0</div>
+          <div class="t">Workout entries</div>
+        </article>
+        <article class="stat">
+          <div id="statMeals" class="k">0</div>
+          <div class="t">Protein entries</div>
+        </article>
+      </section>
+
+      <section id="controlsSection" class="card app-section">
+        <div class="toolbar-grid">
+          <div class="control-panel">
+            <label class="label" for="profileSelect">Profile</label>
+            <select id="profileSelect" class="input"></select>
+            <p class="hint">Switch between users here.</p>
+          </div>
+          <div class="control-panel">
+            <label class="label">Input picker</label>
+            <div class="mode-switch">
+              <button id="modeWorkoutBtn" class="mode-btn active" type="button">Gym Work</button>
+              <button id="modeProteinBtn" class="mode-btn" type="button">Food Intake</button>
+            </div>
+            <p class="hint">On mobile, one input form is shown at a time.</p>
+          </div>
+          <div class="control-panel">
+            <label class="label" for="textScaleSelect">Text size</label>
+            <select id="textScaleSelect" class="input">
+              <option value="auto">Auto</option>
+              <option value="1">Standard</option>
+              <option value="1.12">Large</option>
+              <option value="1.24">Extra Large</option>
+              <option value="1.4">Huge</option>
+            </select>
+            <p class="hint">Auto uses huge text on mobile-like devices.</p>
+          </div>
+        </div>
+      </section>
+
+      <section id="formsSection" class="grid app-section">
+        <article id="workoutCard" class="card">
+          <h2>Workout Log</h2>
+          <p id="workoutModeHint" class="hint mode-note">Logging a new workout entry.</p>
+          <form id="workoutForm">
+            <label class="label" for="workoutDate">Date</label>
+            <input id="workoutDate" name="date" class="input" type="date" required />
+
+            <label class="label" for="training">Training name</label>
+            <input
+              id="training"
+              name="training"
+              class="input"
+              type="text"
+              list="trainingOptions"
+              placeholder="Bench Press"
+              autocomplete="off"
+              autocapitalize="words"
+              required
+            />
+            <datalist id="trainingOptions"></datalist>
+            <div id="trainingQuick" class="quick-picks" hidden></div>
+            <p id="trainingHint" class="hint">No recent training names yet. Your first entries will appear here.</p>
+
+            <label class="label" for="workoutType">Workout type</label>
+            <select id="workoutType" name="workoutType" class="input">
+              <option value="strength">Strength (mass + reps + sets)</option>
+              <option value="cardio">Cardio (time + intensity/speed)</option>
+            </select>
+
+            <div id="strengthFields" class="mode-fields">
+              <div class="row">
+                <div>
+                  <label class="label" for="weightKg">Mass (kg, optional)</label>
+                  <input id="weightKg" name="weightKg" class="input" type="number" min="0" step="0.1" inputmode="decimal" />
+                </div>
+                <div>
+                  <label class="label" for="reps">Reps</label>
+                  <input id="reps" name="reps" class="input" type="number" min="1" step="1" inputmode="numeric" />
+                </div>
+                <div>
+                  <label class="label" for="sets">Sets</label>
+                  <input id="sets" name="sets" class="input" type="number" min="1" step="1" inputmode="numeric" />
+                </div>
+              </div>
+            </div>
+
+            <div id="cardioFields" class="mode-fields" hidden>
+              <div class="row">
+                <div>
+                  <label class="label" for="durationMin">Duration (minutes)</label>
+                  <input id="durationMin" name="durationMin" class="input" type="number" min="1" step="1" inputmode="numeric" />
+                </div>
+                <div>
+                  <label class="label" for="intensity">Intensity (1-10, optional)</label>
+                  <input id="intensity" name="intensity" class="input" type="number" min="1" max="10" step="0.5" inputmode="decimal" />
+                </div>
+                <div>
+                  <label class="label" for="speedKph">Speed (km/h, optional)</label>
+                  <input id="speedKph" name="speedKph" class="input" type="number" min="1" step="0.1" inputmode="decimal" />
+                </div>
+              </div>
+            </div>
+
+            <label class="label" for="workoutNotes">Notes (optional)</label>
+            <input id="workoutNotes" name="notes" class="input" type="text" placeholder="Pause reps, RPE, etc." />
+
+            <div class="button-row">
+              <button id="workoutSubmitBtn" class="btn" type="submit">Add workout</button>
+              <button id="workoutCancelBtn" class="btn btn-secondary" type="button" hidden>Cancel edit</button>
+            </div>
+            <div id="workoutLoading" class="loading">Saving workout...</div>
+          </form>
+        </article>
+
+        <article id="proteinCard" class="card">
+          <h2>Daily Protein</h2>
+          <p id="proteinModeHint" class="hint mode-note">Logging a new protein entry.</p>
+          <form id="proteinForm">
+            <label class="label" for="proteinDate">Date</label>
+            <input id="proteinDate" name="date" class="input" type="date" required />
+
+            <label class="label" for="foodName">Food name</label>
+            <input
+              id="foodName"
+              name="foodName"
+              class="input"
+              type="text"
+              list="foodOptions"
+              placeholder="Chicken breast"
+              required
+            />
+            <datalist id="foodOptions"></datalist>
+
+            <div class="row">
+              <div>
+                <label class="label" for="intakeGrams">Intake (grams)</label>
+                <input id="intakeGrams" name="intakeGrams" class="input" type="number" min="1" step="1" required />
+              </div>
+              <div>
+                <label class="label" for="proteinPer100g">Protein per 100g</label>
+                <input
+                  id="proteinPer100g"
+                  name="proteinPer100g"
+                  class="input"
+                  type="number"
+                  min="0"
+                  max="100"
+                  step="0.1"
+                  placeholder="For new foods only"
+                />
+              </div>
+              <div>
+                <label class="label" for="proteinNotes">Notes</label>
+                <input id="proteinNotes" name="notes" class="input" type="text" placeholder="Cooked / raw, brand, etc." />
+              </div>
+            </div>
+
+            <p id="foodHint" class="hint">Tip: New food requires protein per 100g once, then future entries only need grams.</p>
+            <div class="button-row">
+              <button id="proteinSubmitBtn" class="btn" type="submit">Add protein entry</button>
+              <button id="proteinCancelBtn" class="btn btn-secondary" type="button" hidden>Cancel edit</button>
+            </div>
+            <div id="proteinLoading" class="loading">Saving protein entry...</div>
+          </form>
+        </article>
+      </section>
+
+      <section id="trendSection" class="grid app-section">
+        <article class="card">
+          <h2>Weekly Protein Trend</h2>
+          <p id="proteinTrendHint" class="hint">Last 7 days ending selected date.</p>
+          <canvas id="proteinChart" class="chart-canvas"></canvas>
+          <p class="chart-foot">Y-axis: grams protein</p>
+        </article>
+
+        <article class="card">
+          <h2>Weekly Workout Load</h2>
+          <label class="label" for="workoutTrendSelect">Workout for comparison</label>
+          <select id="workoutTrendSelect" class="input">
+            <option value="__all__">All gym work</option>
+          </select>
+          <p id="volumeTrendHint" class="hint">Choose one workout to compare trend by day.</p>
+          <canvas id="volumeChart" class="chart-canvas"></canvas>
+          <p class="chart-foot">Y-axis: load score (strength volume + cardio score)</p>
+        </article>
+      </section>
+
+      <section id="historySection" class="grid app-section">
+        <article class="card">
+          <h2>Workout History</h2>
+          <div class="table-wrap desktop-only">
+            <table>
+              <thead>
+                <tr>
+                  <th>Training</th>
+                  <th>Type</th>
+                  <th>Details</th>
+                  <th>Notes</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="workoutRows"></tbody>
+            </table>
+          </div>
+          <div id="workoutMobileList" class="mobile-list mobile-only"></div>
+        </article>
+
+        <article class="card">
+          <h2>Protein History</h2>
+          <div class="table-wrap desktop-only">
+            <table>
+              <thead>
+                <tr>
+                  <th>Food</th>
+                  <th>Grams</th>
+                  <th>P/100g</th>
+                  <th>Protein</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="proteinRows"></tbody>
+            </table>
+          </div>
+          <div id="proteinMobileList" class="mobile-list mobile-only"></div>
+          <p class="total">Total: <span id="proteinTotal">0</span> g</p>
+        </article>
+      </section>
+    </main>
+
+    <nav id="mobileNav" class="mobile-nav" hidden>
+      <button id="navLogBtn" class="mobile-nav-btn active" type="button">Log</button>
+      <button id="navTrendBtn" class="mobile-nav-btn" type="button">Trends</button>
+      <button id="navHistoryBtn" class="mobile-nav-btn" type="button">History</button>
+    </nav>
+
+    <div id="toast" class="toast"></div>
+
+    <script>
+      const PROFILE_THEMES = [
+        {
+          bg1: "#f6f2e8",
+          bg2: "#e8f4eb",
+          bg3: "#fdf9f0",
+          primary: "#0a7a4d",
+          primaryStrong: "#055535",
+          accent: "#d26e1d",
+        },
+        {
+          bg1: "#edf3ff",
+          bg2: "#f3f8ff",
+          bg3: "#eef6f3",
+          primary: "#0c5bb9",
+          primaryStrong: "#083f81",
+          accent: "#1f8f7c",
+        },
+        {
+          bg1: "#fff1e8",
+          bg2: "#fff6ea",
+          bg3: "#fff7f2",
+          primary: "#c95a18",
+          primaryStrong: "#8f3f10",
+          accent: "#2f7d66",
+        },
+        {
+          bg1: "#eef7f1",
+          bg2: "#f4fbf4",
+          bg3: "#f8fcf5",
+          primary: "#3f7f2a",
+          primaryStrong: "#2b571d",
+          accent: "#1a6a9f",
+        },
+        {
+          bg1: "#f6efff",
+          bg2: "#f4f0ff",
+          bg3: "#fbf7ff",
+          primary: "#6b44c9",
+          primaryStrong: "#4a2d8f",
+          accent: "#0c7d6f",
+        },
+        {
+          bg1: "#eaf6fb",
+          bg2: "#f2fbff",
+          bg3: "#f7fcff",
+          primary: "#0e6f8f",
+          primaryStrong: "#084e65",
+          accent: "#b46a1f",
+        },
+      ];
+      const WORKOUT_FILTER_ALL = "__all__";
+      const MOBILE_SCREENS = Object.freeze({
+        LOG: "log",
+        TRENDS: "trends",
+        HISTORY: "history",
+      });
+
+      const state = {
+        foods: [],
+        foodLookup: {},
+        profiles: [],
+        currentProfile: "Default",
+        entryMode: "workout",
+        textScalePref: "auto",
+        workoutTrendFilter: WORKOUT_FILTER_ALL,
+        workoutNames: [],
+        recentWorkoutNames: [],
+        mobileScreen: MOBILE_SCREENS.LOG,
+        currentWorkouts: [],
+        currentProteins: [],
+        weeklyTrend: [],
+        mobileLike: false,
+        editingWorkoutRow: null,
+        editingProteinRow: null,
+        resizeTimer: null,
+      };
+
+      const els = {
+        heroSection: document.getElementById("heroSection"),
+        statsSection: document.getElementById("statsSection"),
+        controlsSection: document.getElementById("controlsSection"),
+        formsSection: document.getElementById("formsSection"),
+        trendSection: document.getElementById("trendSection"),
+        historySection: document.getElementById("historySection"),
+        mobileNav: document.getElementById("mobileNav"),
+        navLogBtn: document.getElementById("navLogBtn"),
+        navTrendBtn: document.getElementById("navTrendBtn"),
+        navHistoryBtn: document.getElementById("navHistoryBtn"),
+        reviewDate: document.getElementById("reviewDate"),
+        workoutForm: document.getElementById("workoutForm"),
+        proteinForm: document.getElementById("proteinForm"),
+        workoutCard: document.getElementById("workoutCard"),
+        proteinCard: document.getElementById("proteinCard"),
+        profileSelect: document.getElementById("profileSelect"),
+        modeWorkoutBtn: document.getElementById("modeWorkoutBtn"),
+        modeProteinBtn: document.getElementById("modeProteinBtn"),
+        textScaleSelect: document.getElementById("textScaleSelect"),
+        workoutTrendSelect: document.getElementById("workoutTrendSelect"),
+        workoutDate: document.getElementById("workoutDate"),
+        training: document.getElementById("training"),
+        trainingOptions: document.getElementById("trainingOptions"),
+        trainingQuick: document.getElementById("trainingQuick"),
+        trainingHint: document.getElementById("trainingHint"),
+        workoutType: document.getElementById("workoutType"),
+        strengthFields: document.getElementById("strengthFields"),
+        cardioFields: document.getElementById("cardioFields"),
+        proteinDate: document.getElementById("proteinDate"),
+        foodName: document.getElementById("foodName"),
+        foodHint: document.getElementById("foodHint"),
+        proteinPer100g: document.getElementById("proteinPer100g"),
+        foodOptions: document.getElementById("foodOptions"),
+        workoutRows: document.getElementById("workoutRows"),
+        proteinRows: document.getElementById("proteinRows"),
+        workoutMobileList: document.getElementById("workoutMobileList"),
+        proteinMobileList: document.getElementById("proteinMobileList"),
+        proteinTotal: document.getElementById("proteinTotal"),
+        statProtein: document.getElementById("statProtein"),
+        statWorkouts: document.getElementById("statWorkouts"),
+        statMeals: document.getElementById("statMeals"),
+        workoutLoading: document.getElementById("workoutLoading"),
+        proteinLoading: document.getElementById("proteinLoading"),
+        workoutSubmitBtn: document.getElementById("workoutSubmitBtn"),
+        proteinSubmitBtn: document.getElementById("proteinSubmitBtn"),
+        workoutCancelBtn: document.getElementById("workoutCancelBtn"),
+        proteinCancelBtn: document.getElementById("proteinCancelBtn"),
+        workoutModeHint: document.getElementById("workoutModeHint"),
+        proteinModeHint: document.getElementById("proteinModeHint"),
+        proteinChart: document.getElementById("proteinChart"),
+        volumeChart: document.getElementById("volumeChart"),
+        proteinTrendHint: document.getElementById("proteinTrendHint"),
+        volumeTrendHint: document.getElementById("volumeTrendHint"),
+        toast: document.getElementById("toast"),
+      };
+
+      els.workoutForm.addEventListener("submit", onWorkoutSubmit);
+      els.proteinForm.addEventListener("submit", onProteinSubmit);
+      els.reviewDate.addEventListener("change", refreshForSelectedDate);
+      els.workoutType.addEventListener("change", onWorkoutTypeChange);
+      els.profileSelect.addEventListener("change", onProfileChange);
+      els.modeWorkoutBtn.addEventListener("click", () => setEntryMode("workout"));
+      els.modeProteinBtn.addEventListener("click", () => setEntryMode("protein"));
+      els.textScaleSelect.addEventListener("change", onTextScaleChange);
+      els.workoutTrendSelect.addEventListener("change", onWorkoutTrendFilterChange);
+      els.navLogBtn.addEventListener("click", () => setMobileScreen(MOBILE_SCREENS.LOG));
+      els.navTrendBtn.addEventListener("click", () => setMobileScreen(MOBILE_SCREENS.TRENDS));
+      els.navHistoryBtn.addEventListener("click", () => setMobileScreen(MOBILE_SCREENS.HISTORY));
+      els.foodName.addEventListener("input", onFoodInput);
+      els.trainingQuick.addEventListener("click", onTrainingQuickPickClick);
+      els.workoutRows.addEventListener("click", onWorkoutTableAction);
+      els.proteinRows.addEventListener("click", onProteinTableAction);
+      els.workoutMobileList.addEventListener("click", onWorkoutTableAction);
+      els.proteinMobileList.addEventListener("click", onProteinTableAction);
+      els.workoutCancelBtn.addEventListener("click", cancelWorkoutEdit);
+      els.proteinCancelBtn.addEventListener("click", cancelProteinEdit);
+      window.addEventListener("resize", onWindowResize);
+
+      init();
+
+      function init() {
+        updateMobileLikeMode();
+        const preferredProfile = window.localStorage.getItem("ngfa_profile") || "";
+        const preferredMode = window.localStorage.getItem("ngfa_entry_mode") || "workout";
+        const preferredScreen = normalizeMobileScreen_(
+          window.localStorage.getItem("ngfa_mobile_screen") || MOBILE_SCREENS.LOG
+        );
+        state.mobileScreen = preferredScreen;
+        const preferredTextScaleRaw = window.localStorage.getItem("ngfa_text_scale") || "auto";
+        const preferredWorkoutFilter = loadWorkoutFilterForProfile_(preferredProfile);
+        state.workoutTrendFilter = preferredWorkoutFilter;
+        const preferredTextScale = isMobileLikeLayout_() ? "auto" : preferredTextScaleRaw;
+        state.textScalePref = preferredTextScale;
+        els.textScaleSelect.value = preferredTextScale;
+        if (els.textScaleSelect.value !== preferredTextScale) {
+          els.textScaleSelect.value = "auto";
+          state.textScalePref = "auto";
+        }
+        window.localStorage.setItem("ngfa_text_scale", state.textScalePref);
+        applyTextScale_();
+        applyMobileScreenLayout_();
+        runServer("initApp", {
+          profileName: preferredProfile,
+          trainingName: getTrainingFilterForRequest_(preferredWorkoutFilter),
+        })
+          .then((data) => {
+            setBaseDates(data.today);
+            renderProfiles(data.profiles || [], data.activeProfile || "Default");
+            state.workoutTrendFilter = loadWorkoutFilterForProfile_(state.currentProfile);
+            const workoutFilterAdjusted = renderWorkoutTrendOptions(data.workoutNames || []);
+            renderTrainingOptions(data.workoutNames || [], data.recentWorkoutNames || []);
+            setEntryMode(preferredMode);
+            state.foods = data.foods || [];
+            rebuildFoodLookup();
+            renderFoodOptions();
+            setWorkoutTypeFields("strength");
+            resetProteinInputState();
+            renderWorkoutTable(data.workouts || []);
+            renderProteinTable(data.proteins || []);
+            renderTrendCharts(data.weeklyTrend || []);
+            updateSummaryStats({
+              workoutCount: (data.workouts || []).length,
+              proteinCount: (data.proteins || []).length,
+              dailyProtein: data.dailyTotalProtein || 0,
+            });
+
+            const profileChanged =
+              normalizeKey(preferredProfile) && normalizeKey(preferredProfile) !== normalizeKey(state.currentProfile);
+            if (profileChanged || workoutFilterAdjusted) {
+              refreshForSelectedDate();
+            }
+          })
+          .catch(showError);
+      }
+
+      function onWorkoutSubmit(evt) {
+        evt.preventDefault();
+        const payload = formToObject(els.workoutForm);
+        payload.profileName = state.currentProfile;
+        const editing = Number.isInteger(state.editingWorkoutRow);
+        const fn = editing ? "updateWorkout" : "addWorkout";
+        if (editing) {
+          payload.rowNumber = state.editingWorkoutRow;
+        }
+
+        toggleLoading(els.workoutLoading, true);
+        runServer(fn, payload)
+          .then(() => {
+            return refreshWorkoutTrendOptions();
+          })
+          .then(() => {
+            cancelWorkoutEdit(true);
+            refreshForSelectedDate();
+            showToast(editing ? "Workout updated." : "Workout logged.");
+          })
+          .catch(showError)
+          .finally(() => toggleLoading(els.workoutLoading, false));
+      }
+
+      function onProteinSubmit(evt) {
+        evt.preventDefault();
+        const payload = formToObject(els.proteinForm);
+        payload.profileName = state.currentProfile;
+        const foodKey = normalizeKey(payload.foodName);
+        const knownFood = !!state.foodLookup[foodKey];
+        const editing = Number.isInteger(state.editingProteinRow);
+        const fn = editing ? "updateProteinEntry" : "addProteinEntry";
+        if (editing) {
+          payload.rowNumber = state.editingProteinRow;
+        }
+
+        if (!knownFood && !payload.proteinPer100g) {
+          showError(new Error("New food detected. Please provide protein per 100g once."));
+          return;
+        }
+
+        toggleLoading(els.proteinLoading, true);
+        runServer(fn, payload)
+          .then((res) => {
+            if (res && res.addedFood) {
+              upsertFoodInState({
+                foodName: res.proteinEntry.foodName,
+                proteinPer100g: res.proteinEntry.proteinPer100g,
+              });
+            }
+            cancelProteinEdit(true);
+            refreshForSelectedDate();
+            showToast(editing ? "Protein entry updated." : "Protein entry logged.");
+          })
+          .catch(showError)
+          .finally(() => toggleLoading(els.proteinLoading, false));
+      }
+
+      function renderProfiles(profiles, activeProfile) {
+        state.profiles = Array.isArray(profiles) && profiles.length ? profiles.slice() : ["Default"];
+        els.profileSelect.innerHTML = state.profiles
+          .map((name) => `<option value="${escapeHtml(name)}">${escapeHtml(name)}</option>`)
+          .join("");
+        const selected = state.profiles.includes(activeProfile) ? activeProfile : state.profiles[0];
+        state.currentProfile = selected;
+        els.profileSelect.value = selected;
+        window.localStorage.setItem("ngfa_profile", selected);
+        applyThemeForProfile_(selected);
+      }
+
+      function onProfileChange() {
+        state.currentProfile = els.profileSelect.value || "Default";
+        window.localStorage.setItem("ngfa_profile", state.currentProfile);
+        applyThemeForProfile_(state.currentProfile);
+        state.workoutTrendFilter = loadWorkoutFilterForProfile_(state.currentProfile);
+        cancelWorkoutEdit(true);
+        cancelProteinEdit(true);
+        refreshWorkoutTrendOptions().then(() => refreshForSelectedDate());
+      }
+
+      function onWorkoutTrendFilterChange() {
+        state.workoutTrendFilter = els.workoutTrendSelect.value || WORKOUT_FILTER_ALL;
+        saveWorkoutFilterForProfile_(state.currentProfile, state.workoutTrendFilter);
+        refreshForSelectedDate();
+      }
+
+      function setEntryMode(modeInput) {
+        state.entryMode = modeInput === "protein" ? "protein" : "workout";
+        window.localStorage.setItem("ngfa_entry_mode", state.entryMode);
+        els.modeWorkoutBtn.classList.toggle("active", state.entryMode === "workout");
+        els.modeProteinBtn.classList.toggle("active", state.entryMode === "protein");
+        applyEntryModeVisibility();
+      }
+
+      function normalizeMobileScreen_(value) {
+        const clean = String(value || "").trim().toLowerCase();
+        if (clean === MOBILE_SCREENS.TRENDS) {
+          return MOBILE_SCREENS.TRENDS;
+        }
+        if (clean === MOBILE_SCREENS.HISTORY) {
+          return MOBILE_SCREENS.HISTORY;
+        }
+        return MOBILE_SCREENS.LOG;
+      }
+
+      function setMobileScreen(screenInput) {
+        state.mobileScreen = normalizeMobileScreen_(screenInput);
+        window.localStorage.setItem("ngfa_mobile_screen", state.mobileScreen);
+        applyMobileScreenLayout_();
+        applyEntryModeVisibility();
+        if (isMobileLikeLayout_()) {
+          window.scrollTo({ top: 0, behavior: "smooth" });
+        }
+      }
+
+      function applyMobileScreenLayout_() {
+        const isMobile = isMobileLikeLayout_();
+        els.mobileNav.hidden = !isMobile;
+
+        if (!isMobile) {
+          els.statsSection.hidden = false;
+          els.controlsSection.hidden = false;
+          els.formsSection.hidden = false;
+          els.trendSection.hidden = false;
+          els.historySection.hidden = false;
+          return;
+        }
+
+        const isLog = state.mobileScreen === MOBILE_SCREENS.LOG;
+        const isTrends = state.mobileScreen === MOBILE_SCREENS.TRENDS;
+        const isHistory = state.mobileScreen === MOBILE_SCREENS.HISTORY;
+
+        els.statsSection.hidden = !isLog;
+        els.controlsSection.hidden = !isLog;
+        els.formsSection.hidden = !isLog;
+        els.trendSection.hidden = !isTrends;
+        els.historySection.hidden = !isHistory;
+
+        els.navLogBtn.classList.toggle("active", isLog);
+        els.navTrendBtn.classList.toggle("active", isTrends);
+        els.navHistoryBtn.classList.toggle("active", isHistory);
+      }
+
+      function renderWorkoutTrendOptions(workoutNames) {
+        const names = normalizeNameList_(workoutNames);
+        const previous = state.workoutTrendFilter || WORKOUT_FILTER_ALL;
+        const options = [WORKOUT_FILTER_ALL].concat(names);
+
+        let selected = previous;
+        if (previous !== WORKOUT_FILTER_ALL) {
+          const matched = names.find((name) => normalizeKey(name) === normalizeKey(previous));
+          selected = matched || WORKOUT_FILTER_ALL;
+        }
+
+        els.workoutTrendSelect.innerHTML = options
+          .map((name) => {
+            const label = name === WORKOUT_FILTER_ALL ? "All gym work" : name;
+            return `<option value="${escapeHtml(name)}">${escapeHtml(label)}</option>`;
+          })
+          .join("");
+
+        state.workoutTrendFilter = selected;
+        els.workoutTrendSelect.value = selected;
+        saveWorkoutFilterForProfile_(state.currentProfile, selected);
+        return selected !== previous;
+      }
+
+      function renderTrainingOptions(workoutNamesInput, recentWorkoutNamesInput) {
+        const workoutNames = normalizeNameList_(workoutNamesInput).sort((a, b) => a.localeCompare(b));
+        const workoutSet = {};
+        workoutNames.forEach((name) => {
+          workoutSet[normalizeKey(name)] = true;
+        });
+
+        let recentWorkoutNames = normalizeNameList_(recentWorkoutNamesInput).filter(
+          (name) => !!workoutSet[normalizeKey(name)]
+        );
+        if (recentWorkoutNames.length > 8) {
+          recentWorkoutNames = recentWorkoutNames.slice(0, 8);
+        }
+        if (!recentWorkoutNames.length && workoutNames.length) {
+          recentWorkoutNames = workoutNames.slice(0, 8);
+        }
+
+        state.workoutNames = workoutNames;
+        state.recentWorkoutNames = recentWorkoutNames;
+
+        els.trainingOptions.innerHTML = workoutNames
+          .map((name) => `<option value="${escapeHtml(name)}"></option>`)
+          .join("");
+
+        if (!recentWorkoutNames.length) {
+          els.trainingQuick.hidden = true;
+          els.trainingQuick.innerHTML = "";
+          els.trainingHint.textContent = "No recent training names yet. Your first entries will appear here.";
+          return;
+        }
+
+        els.trainingQuick.hidden = false;
+        els.trainingQuick.innerHTML = recentWorkoutNames
+          .map(
+            (name) =>
+              `<button type="button" class="quick-chip" data-training="${escapeHtml(name)}">${escapeHtml(name)}</button>`
+          )
+          .join("");
+        els.trainingHint.textContent = "Tap a recent training name to fill quickly.";
+      }
+
+      function refreshWorkoutTrendOptions() {
+        const request = { profileName: state.currentProfile };
+        return Promise.all([
+          runServer("getWorkoutNames", request),
+          runServer("getRecentWorkoutNames", {
+            profileName: state.currentProfile,
+            limit: 8,
+          }),
+        ])
+          .then(([workoutNames, recentWorkoutNames]) => {
+            const adjusted = renderWorkoutTrendOptions(workoutNames || []);
+            renderTrainingOptions(workoutNames || [], recentWorkoutNames || []);
+            return adjusted;
+          })
+          .catch((err) => {
+            showError(err);
+            return false;
+          });
+      }
+
+      function normalizeNameList_(namesInput) {
+        const names = Array.isArray(namesInput) ? namesInput : [];
+        const seen = {};
+        const out = [];
+        names.forEach((name) => {
+          const clean = String(name || "").trim();
+          const key = normalizeKey(clean);
+          if (!clean || seen[key]) {
+            return;
+          }
+          seen[key] = true;
+          out.push(clean);
+        });
+        return out;
+      }
+
+      function workoutFilterStorageKey_(profileName) {
+        const profileKey = normalizeKey(profileName || "default");
+        return `ngfa_workout_filter_${profileKey || "default"}`;
+      }
+
+      function loadWorkoutFilterForProfile_(profileName) {
+        const stored = window.localStorage.getItem(workoutFilterStorageKey_(profileName));
+        return stored || WORKOUT_FILTER_ALL;
+      }
+
+      function saveWorkoutFilterForProfile_(profileName, filterValue) {
+        window.localStorage.setItem(
+          workoutFilterStorageKey_(profileName),
+          String(filterValue || WORKOUT_FILTER_ALL)
+        );
+      }
+
+      function getTrainingFilterForRequest_(filterValue) {
+        return filterValue && filterValue !== WORKOUT_FILTER_ALL ? String(filterValue) : "";
+      }
+
+      function onTextScaleChange() {
+        const pref = String(els.textScaleSelect.value || "auto");
+        state.textScalePref = pref;
+        window.localStorage.setItem("ngfa_text_scale", pref);
+        applyTextScale_();
+      }
+
+      function applyTextScale_() {
+        let scale = Number(state.textScalePref);
+        if (!Number.isFinite(scale) || scale <= 0) {
+          scale = computeAutoTextScale_();
+        }
+        scale = Math.max(1, Math.min(1.6, scale));
+        document.documentElement.style.setProperty("--text-scale", String(scale));
+      }
+
+      function computeAutoTextScale_() {
+        if (!isMobileLikeLayout_()) {
+          return 1;
+        }
+        return 1.4;
+      }
+
+      function applyThemeForProfile_(profileName) {
+        const key = String(profileName || "Default");
+        const hash = hashString_(key);
+        const theme = PROFILE_THEMES[hash % PROFILE_THEMES.length];
+        const root = document.documentElement;
+        root.style.setProperty("--bg-1", theme.bg1);
+        root.style.setProperty("--bg-2", theme.bg2);
+        root.style.setProperty("--bg-3", theme.bg3);
+        root.style.setProperty("--primary", theme.primary);
+        root.style.setProperty("--primary-strong", theme.primaryStrong);
+        root.style.setProperty("--accent", theme.accent);
+      }
+
+      function hashString_(text) {
+        let hash = 0;
+        for (let i = 0; i < text.length; i += 1) {
+          hash = (hash << 5) - hash + text.charCodeAt(i);
+          hash |= 0;
+        }
+        return Math.abs(hash);
+      }
+
+      function applyEntryModeVisibility() {
+        const isMobile = isMobileLikeLayout_();
+        if (!isMobile) {
+          els.workoutCard.hidden = false;
+          els.proteinCard.hidden = false;
+          return;
+        }
+        if (state.mobileScreen !== MOBILE_SCREENS.LOG) {
+          els.workoutCard.hidden = true;
+          els.proteinCard.hidden = true;
+          return;
+        }
+        els.workoutCard.hidden = state.entryMode !== "workout";
+        els.proteinCard.hidden = state.entryMode !== "protein";
+      }
+
+      function refreshForSelectedDate() {
+        const date = els.reviewDate.value;
+        if (!date) {
+          return;
+        }
+
+        els.workoutDate.value = date;
+        els.proteinDate.value = date;
+
+        const request = {
+          date: date,
+          profileName: state.currentProfile,
+          trainingName: getTrainingFilterForRequest_(state.workoutTrendFilter),
+        };
+        Promise.all([runServer("getDailySnapshot", request), runServer("getWeeklyTrend", request)])
+          .then(([snap, trend]) => {
+            renderWorkoutTable(snap.workouts || []);
+            renderProteinTable(snap.proteins || []);
+            renderTrendCharts(trend || []);
+            updateSummaryStats({
+              workoutCount: (snap.workouts || []).length,
+              proteinCount: (snap.proteins || []).length,
+              dailyProtein: snap.dailyTotalProtein || 0,
+            });
+          })
+          .catch(showError);
+      }
+
+      function renderWorkoutTable(rows) {
+        state.currentWorkouts = rows.slice();
+        if (!rows.length) {
+          els.workoutRows.innerHTML =
+            '<tr><td colspan="5"><span class="pill">No entries for this day</span></td></tr>';
+          els.workoutMobileList.innerHTML = '<span class="pill">No entries for this day</span>';
+          return;
+        }
+
+        els.workoutRows.innerHTML = rows
+          .map(
+            (row) => `
+          <tr>
+            <td>${escapeHtml(row.training)}</td>
+            <td>${escapeHtml(formatWorkoutTypeLabel(row))}</td>
+            <td>${escapeHtml(formatWorkoutDetail(row))}</td>
+            <td>${escapeHtml(row.notes || "-")}</td>
+            <td class="actions">
+              <button type="button" class="btn-inline" data-action="edit-workout" data-row="${row.rowNumber}">Edit</button>
+              <button type="button" class="btn-inline danger" data-action="delete-workout" data-row="${row.rowNumber}">Delete</button>
+            </td>
+          </tr>`
+          )
+          .join("");
+
+        els.workoutMobileList.innerHTML = rows
+          .map(
+            (row) => `
+          <article class="mobile-item">
+            <div class="mobile-item-top">
+              <div class="mobile-item-title">${escapeHtml(row.training)}</div>
+              <span class="pill">${escapeHtml(formatWorkoutTypeLabel(row))}</span>
+            </div>
+            <div class="mobile-item-meta">${escapeHtml(formatWorkoutDetail(row))}</div>
+            <div class="mobile-item-meta">${escapeHtml(row.notes || "No notes")}</div>
+            <div class="mobile-item-actions">
+              <button type="button" class="btn-inline" data-action="edit-workout" data-row="${row.rowNumber}">Edit</button>
+              <button type="button" class="btn-inline danger" data-action="delete-workout" data-row="${row.rowNumber}">Delete</button>
+            </div>
+          </article>`
+          )
+          .join("");
+      }
+
+      function renderProteinTable(rows) {
+        state.currentProteins = rows.slice();
+        if (!rows.length) {
+          els.proteinRows.innerHTML =
+            '<tr><td colspan="5"><span class="pill">No entries for this day</span></td></tr>';
+          els.proteinMobileList.innerHTML = '<span class="pill">No entries for this day</span>';
+          els.proteinTotal.textContent = "0.0";
+          return;
+        }
+
+        let total = 0;
+        els.proteinRows.innerHTML = rows
+          .map((row) => {
+            total += Number(row.proteinGrams) || 0;
+            return `
+              <tr>
+                <td>${escapeHtml(row.foodName)}</td>
+                <td>${Number(row.intakeGrams).toFixed(1)} g</td>
+                <td>${Number(row.proteinPer100g).toFixed(1)} g</td>
+                <td>${Number(row.proteinGrams).toFixed(1)} g</td>
+                <td class="actions">
+                  <button type="button" class="btn-inline" data-action="edit-protein" data-row="${row.rowNumber}">Edit</button>
+                  <button type="button" class="btn-inline danger" data-action="delete-protein" data-row="${row.rowNumber}">Delete</button>
+                </td>
+              </tr>`;
+          })
+          .join("");
+
+        els.proteinMobileList.innerHTML = rows
+          .map(
+            (row) => `
+          <article class="mobile-item">
+            <div class="mobile-item-top">
+              <div class="mobile-item-title">${escapeHtml(row.foodName)}</div>
+              <span class="pill">${Number(row.proteinGrams).toFixed(1)} g protein</span>
+            </div>
+            <div class="mobile-item-meta">${Number(row.intakeGrams).toFixed(1)} g food @ ${Number(
+              row.proteinPer100g
+            ).toFixed(1)} g/100g</div>
+            <div class="mobile-item-actions">
+              <button type="button" class="btn-inline" data-action="edit-protein" data-row="${row.rowNumber}">Edit</button>
+              <button type="button" class="btn-inline danger" data-action="delete-protein" data-row="${row.rowNumber}">Delete</button>
+            </div>
+          </article>`
+          )
+          .join("");
+
+        els.proteinTotal.textContent = total.toFixed(1);
+      }
+
+      function renderTrendCharts(rows) {
+        state.weeklyTrend = rows.slice();
+        const selectedWorkoutLabel =
+          state.workoutTrendFilter === WORKOUT_FILTER_ALL ? "All gym work" : state.workoutTrendFilter;
+        if (!rows.length) {
+          drawLineChart(els.proteinChart, [], {
+            lineColor: "#0a7a4d",
+            fillColor: "rgba(10, 122, 77, 0.2)",
+            unit: "g",
+          });
+          drawLineChart(els.volumeChart, [], {
+            lineColor: "#d26e1d",
+            fillColor: "rgba(210, 110, 29, 0.2)",
+            unit: "load",
+          });
+          els.volumeTrendHint.textContent = `${selectedWorkoutLabel}: no entries in selected 7-day window.`;
+          return;
+        }
+
+        const proteinSeries = rows.map((row) => ({
+          label: shortDate(row.date),
+          value: Number(row.totalProteinGrams || 0),
+        }));
+        const volumeSeries = rows.map((row) => ({
+          label: shortDate(row.date),
+          value: Number(row.workoutLoad || row.workoutVolume || 0),
+        }));
+
+        drawLineChart(els.proteinChart, proteinSeries, {
+          lineColor: "#0a7a4d",
+          fillColor: "rgba(10, 122, 77, 0.2)",
+          unit: "g",
+        });
+        drawLineChart(els.volumeChart, volumeSeries, {
+          lineColor: "#d26e1d",
+          fillColor: "rgba(210, 110, 29, 0.2)",
+          unit: "load",
+        });
+
+        const range = `${shortDate(rows[0].date)} to ${shortDate(rows[rows.length - 1].date)}`;
+        els.proteinTrendHint.textContent = `Last 7 days ending selected date (${range}).`;
+        els.volumeTrendHint.textContent = `${selectedWorkoutLabel}: daily load trend (${range}).`;
+      }
+
+      function drawLineChart(canvas, series, config) {
+        const context = prepareCanvas(canvas);
+        const ctx = context.ctx;
+        const width = context.width;
+        const height = context.height;
+        const unit = config.unit || "";
+        const lineColor = config.lineColor;
+        const fillColor = config.fillColor;
+
+        const left = 40;
+        const right = 10;
+        const top = 12;
+        const bottom = 28;
+        const plotWidth = Math.max(1, width - left - right);
+        const plotHeight = Math.max(1, height - top - bottom);
+
+        if (!series.length) {
+          ctx.fillStyle = "#5c6e67";
+          ctx.font = "12px Sora";
+          ctx.fillText("No data", left, top + plotHeight / 2);
+          return;
+        }
+
+        const values = series.map((p) => Number(p.value || 0));
+        const max = Math.max(1, ...values);
+
+        ctx.strokeStyle = "rgba(20, 52, 41, 0.15)";
+        ctx.fillStyle = "#5c6e67";
+        ctx.font = "10px IBM Plex Mono";
+        for (let i = 0; i <= 4; i += 1) {
+          const y = top + (plotHeight * i) / 4;
+          const value = ((max * (4 - i)) / 4).toFixed(max > 25 ? 0 : 1);
+          ctx.beginPath();
+          ctx.moveTo(left, y);
+          ctx.lineTo(width - right, y);
+          ctx.stroke();
+          ctx.fillText(`${value}${unit ? " " + unit : ""}`, 2, y + 3);
+        }
+
+        const points = series.map((p, idx) => {
+          const x =
+            series.length === 1 ? left + plotWidth / 2 : left + (plotWidth * idx) / (series.length - 1);
+          const y = top + plotHeight * (1 - Number(p.value || 0) / max);
+          return { x: x, y: y, label: p.label, value: Number(p.value || 0) };
+        });
+
+        ctx.beginPath();
+        ctx.moveTo(points[0].x, top + plotHeight);
+        points.forEach((point) => ctx.lineTo(point.x, point.y));
+        ctx.lineTo(points[points.length - 1].x, top + plotHeight);
+        ctx.closePath();
+        ctx.fillStyle = fillColor;
+        ctx.fill();
+
+        ctx.beginPath();
+        points.forEach((point, idx) => {
+          if (idx === 0) {
+            ctx.moveTo(point.x, point.y);
+          } else {
+            ctx.lineTo(point.x, point.y);
+          }
+        });
+        ctx.strokeStyle = lineColor;
+        ctx.lineWidth = 2.2;
+        ctx.stroke();
+
+        ctx.fillStyle = lineColor;
+        points.forEach((point) => {
+          ctx.beginPath();
+          ctx.arc(point.x, point.y, 2.8, 0, Math.PI * 2);
+          ctx.fill();
+        });
+
+        ctx.fillStyle = "#4d5f58";
+        ctx.font = "10px IBM Plex Mono";
+        points.forEach((point) => {
+          ctx.fillText(point.label, point.x - 14, top + plotHeight + 16);
+        });
+      }
+
+      function prepareCanvas(canvas) {
+        const ratio = window.devicePixelRatio || 1;
+        const rect = canvas.getBoundingClientRect();
+        const width = Math.max(260, Math.floor(rect.width || 260));
+        const height = Math.max(180, Math.floor(rect.height || 220));
+        canvas.width = Math.floor(width * ratio);
+        canvas.height = Math.floor(height * ratio);
+        const ctx = canvas.getContext("2d");
+        ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
+        ctx.clearRect(0, 0, width, height);
+        return { ctx: ctx, width: width, height: height };
+      }
+
+      function onWorkoutTableAction(evt) {
+        const btn = evt.target.closest("button[data-action]");
+        if (!btn) {
+          return;
+        }
+        const action = btn.dataset.action;
+        const rowNumber = Number(btn.dataset.row);
+        if (!Number.isInteger(rowNumber)) {
+          return;
+        }
+
+        if (action === "edit-workout") {
+          startWorkoutEdit(rowNumber);
+          return;
+        }
+        if (action === "delete-workout") {
+          deleteWorkoutRow(rowNumber);
+        }
+      }
+
+      function onProteinTableAction(evt) {
+        const btn = evt.target.closest("button[data-action]");
+        if (!btn) {
+          return;
+        }
+        const action = btn.dataset.action;
+        const rowNumber = Number(btn.dataset.row);
+        if (!Number.isInteger(rowNumber)) {
+          return;
+        }
+
+        if (action === "edit-protein") {
+          startProteinEdit(rowNumber);
+          return;
+        }
+        if (action === "delete-protein") {
+          deleteProteinRow(rowNumber);
+        }
+      }
+
+      function onWorkoutTypeChange() {
+        setWorkoutTypeFields(els.workoutType.value);
+      }
+
+      function setWorkoutTypeFields(typeInput) {
+        const type = typeInput === "cardio" ? "cardio" : "strength";
+        const isCardio = type === "cardio";
+
+        els.strengthFields.hidden = isCardio;
+        els.cardioFields.hidden = !isCardio;
+
+        const weightInput = document.getElementById("weightKg");
+        const repsInput = document.getElementById("reps");
+        const setsInput = document.getElementById("sets");
+        const durationInput = document.getElementById("durationMin");
+
+        weightInput.disabled = isCardio;
+        repsInput.disabled = isCardio;
+        setsInput.disabled = isCardio;
+        durationInput.disabled = !isCardio;
+        document.getElementById("intensity").disabled = !isCardio;
+        document.getElementById("speedKph").disabled = !isCardio;
+
+        repsInput.required = !isCardio;
+        setsInput.required = !isCardio;
+        durationInput.required = isCardio;
+      }
+
+      function onTrainingQuickPickClick(evt) {
+        const button = evt.target.closest("button[data-training]");
+        if (!button) {
+          return;
+        }
+        const training = String(button.dataset.training || "").trim();
+        if (!training) {
+          return;
+        }
+        els.training.value = training;
+        els.training.focus();
+        if (typeof els.training.setSelectionRange === "function") {
+          const last = els.training.value.length;
+          els.training.setSelectionRange(last, last);
+        }
+      }
+
+      function getWorkoutType(row) {
+        return row && row.workoutType === "cardio" ? "cardio" : "strength";
+      }
+
+      function formatWorkoutTypeLabel(row) {
+        return getWorkoutType(row) === "cardio" ? "Cardio" : "Strength";
+      }
+
+      function formatWorkoutDetail(row) {
+        if (getWorkoutType(row) === "cardio") {
+          const parts = [];
+          if (row.durationMin !== null) {
+            parts.push(`${Number(row.durationMin).toFixed(1)} min`);
+          }
+          if (row.intensity !== null) {
+            parts.push(`Intensity ${Number(row.intensity).toFixed(1)}`);
+          }
+          if (row.speedKph !== null) {
+            parts.push(`${Number(row.speedKph).toFixed(1)} km/h`);
+          }
+          return parts.length ? parts.join(" • ") : "Cardio session";
+        }
+
+        const parts = [];
+        if (row.weightKg !== null) {
+          parts.push(`${Number(row.weightKg).toFixed(1)} kg`);
+        }
+        if (row.reps !== null && row.sets !== null) {
+          parts.push(`${row.reps} x ${row.sets}`);
+        }
+        return parts.length ? parts.join(" • ") : "Strength session";
+      }
+
+      function startWorkoutEdit(rowNumber) {
+        const row = state.currentWorkouts.find((item) => Number(item.rowNumber) === rowNumber);
+        if (!row) {
+          showError(new Error("Workout entry no longer exists. Refresh and try again."));
+          return;
+        }
+
+        state.editingWorkoutRow = rowNumber;
+        setWorkoutMode(true);
+        const type = getWorkoutType(row);
+        els.workoutType.value = type;
+        setWorkoutTypeFields(type);
+        els.workoutDate.value = row.date || els.reviewDate.value;
+        els.training.value = row.training || "";
+        document.getElementById("weightKg").value = row.weightKg === null ? "" : Number(row.weightKg || 0).toFixed(1);
+        document.getElementById("reps").value = row.reps === null ? "" : String(row.reps || "");
+        document.getElementById("sets").value = row.sets === null ? "" : String(row.sets || "");
+        document.getElementById("durationMin").value =
+          row.durationMin === null ? "" : Number(row.durationMin || 0).toFixed(1);
+        document.getElementById("intensity").value =
+          row.intensity === null ? "" : Number(row.intensity || 0).toFixed(1);
+        document.getElementById("speedKph").value = row.speedKph === null ? "" : Number(row.speedKph || 0).toFixed(1);
+        document.getElementById("workoutNotes").value = row.notes || "";
+      }
+
+      function cancelWorkoutEdit(skipResetDate) {
+        state.editingWorkoutRow = null;
+        setWorkoutMode(false);
+        els.workoutForm.reset();
+        els.workoutType.value = "strength";
+        setWorkoutTypeFields("strength");
+        if (!skipResetDate) {
+          els.workoutDate.value = els.reviewDate.value;
+        } else {
+          els.workoutDate.value = els.reviewDate.value;
+        }
+      }
+
+      function setWorkoutMode(editing) {
+        els.workoutSubmitBtn.textContent = editing ? "Update workout" : "Add workout";
+        els.workoutCancelBtn.hidden = !editing;
+        els.workoutModeHint.textContent = editing
+          ? "Editing existing workout entry."
+          : "Logging a new workout entry.";
+      }
+
+      function startProteinEdit(rowNumber) {
+        const row = state.currentProteins.find((item) => Number(item.rowNumber) === rowNumber);
+        if (!row) {
+          showError(new Error("Protein entry no longer exists. Refresh and try again."));
+          return;
+        }
+
+        state.editingProteinRow = rowNumber;
+        setProteinMode(true);
+        els.proteinDate.value = row.date || els.reviewDate.value;
+        els.foodName.value = row.foodName || "";
+        document.getElementById("intakeGrams").value = Number(row.intakeGrams || 0).toFixed(1);
+        document.getElementById("proteinNotes").value = row.notes || "";
+        onFoodInput();
+
+        if (!state.foodLookup[normalizeKey(row.foodName)]) {
+          els.proteinPer100g.disabled = false;
+          els.proteinPer100g.value = Number(row.proteinPer100g || 0).toFixed(1);
+        }
+      }
+
+      function cancelProteinEdit(skipResetDate) {
+        state.editingProteinRow = null;
+        setProteinMode(false);
+        els.proteinForm.reset();
+        if (!skipResetDate) {
+          els.proteinDate.value = els.reviewDate.value;
+        } else {
+          els.proteinDate.value = els.reviewDate.value;
+        }
+        resetProteinInputState();
+      }
+
+      function setProteinMode(editing) {
+        els.proteinSubmitBtn.textContent = editing ? "Update protein entry" : "Add protein entry";
+        els.proteinCancelBtn.hidden = !editing;
+        els.proteinModeHint.textContent = editing
+          ? "Editing existing protein entry."
+          : "Logging a new protein entry.";
+      }
+
+      function deleteWorkoutRow(rowNumber) {
+        if (!window.confirm("Delete this workout entry?")) {
+          return;
+        }
+        runServer("deleteWorkout", rowNumber)
+          .then(() => {
+            if (state.editingWorkoutRow === rowNumber) {
+              cancelWorkoutEdit();
+            }
+            return refreshWorkoutTrendOptions();
+          })
+          .then(() => {
+            refreshForSelectedDate();
+            showToast("Workout entry deleted.");
+          })
+          .catch(showError);
+      }
+
+      function deleteProteinRow(rowNumber) {
+        if (!window.confirm("Delete this protein entry?")) {
+          return;
+        }
+        runServer("deleteProteinEntry", rowNumber)
+          .then(() => {
+            if (state.editingProteinRow === rowNumber) {
+              cancelProteinEdit();
+            }
+            refreshForSelectedDate();
+            showToast("Protein entry deleted.");
+          })
+          .catch(showError);
+      }
+
+      function renderFoodOptions() {
+        els.foodOptions.innerHTML = state.foods
+          .map(
+            (food) =>
+              `<option value="${escapeHtml(food.foodName)}">${Number(food.proteinPer100g).toFixed(1)} g protein per 100g</option>`
+          )
+          .join("");
+      }
+
+      function rebuildFoodLookup() {
+        state.foodLookup = {};
+        state.foods.forEach((food) => {
+          state.foodLookup[normalizeKey(food.foodName)] = food;
+        });
+      }
+
+      function upsertFoodInState(food) {
+        const key = normalizeKey(food.foodName);
+        const existing = state.foods.find((item) => normalizeKey(item.foodName) === key);
+        if (existing) {
+          existing.proteinPer100g = Number(food.proteinPer100g || 0);
+        } else {
+          state.foods.push({
+            foodName: food.foodName,
+            proteinPer100g: Number(food.proteinPer100g || 0),
+          });
+          state.foods.sort((a, b) => a.foodName.localeCompare(b.foodName));
+        }
+        rebuildFoodLookup();
+        renderFoodOptions();
+      }
+
+      function onFoodInput() {
+        const food = (els.foodName.value || "").trim();
+        const known = !!state.foodLookup[normalizeKey(food)];
+        if (known || !food) {
+          els.foodHint.textContent = known
+            ? `Known food. Using ${state.foodLookup[normalizeKey(food)].proteinPer100g.toFixed(1)}g protein per 100g automatically.`
+            : "Tip: New food requires protein per 100g once, then future entries only need grams.";
+          els.proteinPer100g.value = "";
+          els.proteinPer100g.placeholder = known ? "Auto from saved food" : "For new foods only";
+          els.proteinPer100g.disabled = known;
+          return;
+        }
+
+        els.proteinPer100g.disabled = false;
+        els.foodHint.textContent = "New food detected. Enter protein per 100g to save this food profile.";
+      }
+
+      function resetProteinInputState() {
+        els.proteinPer100g.disabled = false;
+        els.proteinPer100g.placeholder = "For new foods only";
+        els.foodHint.textContent = "Tip: New food requires protein per 100g once, then future entries only need grams.";
+      }
+
+      function setBaseDates(dateText) {
+        els.reviewDate.value = dateText;
+        els.workoutDate.value = dateText;
+        els.proteinDate.value = dateText;
+      }
+
+      function updateSummaryStats(data) {
+        els.statProtein.textContent = `${Number(data.dailyProtein || 0).toFixed(1)} g`;
+        els.statWorkouts.textContent = String(data.workoutCount || 0);
+        els.statMeals.textContent = String(data.proteinCount || 0);
+      }
+
+      function onWindowResize() {
+        if (state.resizeTimer) {
+          window.clearTimeout(state.resizeTimer);
+        }
+        state.resizeTimer = window.setTimeout(() => {
+          updateMobileLikeMode();
+          applyTextScale_();
+          applyMobileScreenLayout_();
+          applyEntryModeVisibility();
+          renderTrendCharts(state.weeklyTrend || []);
+        }, 120);
+      }
+
+      function detectMobileLike_() {
+        const narrowViewport = window.matchMedia("(max-width: 980px)").matches;
+        const coarsePointer = window.matchMedia("(pointer: coarse)").matches;
+        const hasTouch = "ontouchstart" in window || navigator.maxTouchPoints > 0;
+        const mobileUA = /android|iphone|ipad|ipod|mobile|windows phone/i.test(
+          String(navigator.userAgent || "")
+        );
+        return narrowViewport || mobileUA || (coarsePointer && hasTouch);
+      }
+
+      function updateMobileLikeMode() {
+        state.mobileLike = detectMobileLike_();
+        document.body.classList.toggle("mobile-like", state.mobileLike);
+      }
+
+      function isMobileLikeLayout_() {
+        return state.mobileLike || window.matchMedia("(max-width: 880px)").matches;
+      }
+
+      function shortDate(value) {
+        const text = String(value || "");
+        if (!/^\d{4}-\d{2}-\d{2}$/.test(text)) {
+          return text;
+        }
+        return `${text.slice(5, 7)}/${text.slice(8, 10)}`;
+      }
+
+      function showToast(message) {
+        els.toast.textContent = message;
+        els.toast.classList.add("show");
+        window.setTimeout(() => els.toast.classList.remove("show"), 2200);
+      }
+
+      function showError(err) {
+        const msg = err && err.message ? err.message : String(err || "Unknown error");
+        showToast(msg);
+      }
+
+      function formToObject(form) {
+        const data = new FormData(form);
+        const obj = {};
+        for (const [k, v] of data.entries()) {
+          obj[k] = String(v).trim();
+        }
+        return obj;
+      }
+
+      function normalizeKey(value) {
+        return String(value || "").trim().toLowerCase();
+      }
+
+      function escapeHtml(input) {
+        return String(input || "")
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/"/g, "&quot;")
+          .replace(/'/g, "&#039;");
+      }
+
+      function toggleLoading(el, on) {
+        el.classList.toggle("show", !!on);
+      }
+
+      function runServer(functionName, payload) {
+        return new Promise((resolve, reject) => {
+          const runner = google.script.run.withSuccessHandler(resolve).withFailureHandler(reject);
+          if (typeof payload === "undefined") {
+            runner[functionName]();
+            return;
+          }
+          runner[functionName](payload);
+        });
+      }
+    </script>
+  </body>
+</html>
