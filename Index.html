@@ -45,6 +45,10 @@
         box-sizing: border-box;
       }
 
+      [hidden] {
+        display: none !important;
+      }
+
       body {
         margin: 0;
         min-height: 100vh;
@@ -495,14 +499,14 @@
           grid-template-columns: 1fr;
         }
         .stats {
-          grid-template-columns: 1fr;
-          gap: 12px;
-          padding-inline: 8px;
+          grid-template-columns: repeat(3, minmax(0, 1fr));
+          gap: 8px;
+          padding-inline: 0;
         }
 
         .stats .stat {
-          width: min(100%, 34rem);
-          margin-inline: auto;
+          width: auto;
+          margin-inline: 0;
         }
         .row {
           grid-template-columns: 1fr;
@@ -561,15 +565,16 @@
       }
 
       body.mobile-like .stats {
-        grid-template-columns: 1fr;
-        gap: 12px;
-        padding-inline: 8px;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 8px;
+        padding-inline: 0;
       }
 
       body.mobile-like .stats .stat {
-        width: min(100%, 34rem);
-        margin-left: auto;
-        margin-right: auto;
+        width: auto;
+        margin: 0;
+        min-height: 84px;
+        padding: 10px 9px;
       }
 
       body.mobile-like .row {
@@ -579,6 +584,8 @@
       body.mobile-like .hero {
         flex-direction: column;
         align-items: flex-start;
+        gap: 8px;
+        margin-bottom: 8px;
       }
 
       body.mobile-like .review-date {
@@ -596,11 +603,19 @@
 
       body.mobile-like .toolbar-grid {
         grid-template-columns: 1fr;
-        gap: 10px;
+        gap: 8px;
       }
 
       body.mobile-like .mode-switch {
         grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      body.mobile-like .control-panel .hint {
+        display: none;
+      }
+
+      body.mobile-like #textScalePanel {
+        display: none;
       }
 
       body.mobile-like .desktop-only {
@@ -625,7 +640,7 @@
       }
 
       body.mobile-like .sub {
-        font-size: 1.1rem;
+        display: none;
       }
 
       body.mobile-like .card h2 {
@@ -658,7 +673,8 @@
       }
 
       body.mobile-like .stat .k {
-        font-size: 1.8rem;
+        font-size: 1.35rem;
+        line-height: 1.15;
       }
 
       body.mobile-like .stat .t,
@@ -666,7 +682,13 @@
       body.mobile-like .mobile-item-meta,
       body.mobile-like th,
       body.mobile-like td {
-        font-size: 1.06rem;
+        font-size: 1.03rem;
+      }
+
+      body.mobile-like .stat .t {
+        margin-top: 2px;
+        font-size: 0.84rem;
+        line-height: 1.25;
       }
 
       body.mobile-like .pill {
@@ -684,7 +706,7 @@
       }
 
       body.mobile-like .wrap {
-        padding-bottom: 92px;
+        padding-bottom: calc(112px + env(safe-area-inset-bottom, 0px));
       }
 
       body.mobile-like .mobile-nav {
@@ -694,7 +716,7 @@
         position: fixed;
         left: 10px;
         right: 10px;
-        bottom: 10px;
+        bottom: calc(10px + env(safe-area-inset-bottom, 0px));
         z-index: 70;
         padding: 8px;
         border-radius: 14px;
@@ -748,7 +770,7 @@
             </div>
             <p class="hint">On mobile, one input form is shown at a time.</p>
           </div>
-          <div class="control-panel">
+          <div id="textScalePanel" class="control-panel">
             <label class="label" for="textScaleSelect">Text size</label>
             <select id="textScaleSelect" class="input">
               <option value="auto">Auto</option>
@@ -1299,6 +1321,7 @@
         els.mobileNav.hidden = !isMobile;
 
         if (!isMobile) {
+          els.heroSection.hidden = false;
           els.statsSection.hidden = false;
           els.controlsSection.hidden = false;
           els.formsSection.hidden = false;
@@ -1311,6 +1334,7 @@
         const isTrends = state.mobileScreen === MOBILE_SCREENS.TRENDS;
         const isHistory = state.mobileScreen === MOBILE_SCREENS.HISTORY;
 
+        els.heroSection.hidden = !isLog;
         els.statsSection.hidden = !isLog;
         els.controlsSection.hidden = !isLog;
         els.formsSection.hidden = !isLog;
@@ -1710,9 +1734,12 @@
         const ctx = context.ctx;
         const width = context.width;
         const height = context.height;
+        const mobile = isMobileLikeLayout_();
         const unit = config.unit || "";
         const lineColor = config.lineColor;
         const fillColor = config.fillColor;
+        const axisFont = mobile ? "12px IBM Plex Mono" : "10px IBM Plex Mono";
+        const emptyFont = mobile ? "13px Sora" : "12px Sora";
 
         const left = 40;
         const right = 10;
@@ -1723,7 +1750,7 @@
 
         if (!series.length) {
           ctx.fillStyle = "#5c6e67";
-          ctx.font = "12px Sora";
+          ctx.font = emptyFont;
           ctx.fillText("No data", left, top + plotHeight / 2);
           return;
         }
@@ -1733,7 +1760,7 @@
 
         ctx.strokeStyle = "rgba(20, 52, 41, 0.15)";
         ctx.fillStyle = "#5c6e67";
-        ctx.font = "10px IBM Plex Mono";
+        ctx.font = axisFont;
         for (let i = 0; i <= 4; i += 1) {
           const y = top + (plotHeight * i) / 4;
           const value = ((max * (4 - i)) / 4).toFixed(max > 25 ? 0 : 1);
@@ -1779,7 +1806,7 @@
         });
 
         ctx.fillStyle = "#4d5f58";
-        ctx.font = "10px IBM Plex Mono";
+        ctx.font = axisFont;
         points.forEach((point) => {
           ctx.fillText(point.label, point.x - 14, top + plotHeight + 16);
         });
