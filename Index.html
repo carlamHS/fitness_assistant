@@ -496,6 +496,13 @@
         }
         .stats {
           grid-template-columns: 1fr;
+          gap: 12px;
+          padding-inline: 8px;
+        }
+
+        .stats .stat {
+          width: min(100%, 34rem);
+          margin-inline: auto;
         }
         .row {
           grid-template-columns: 1fr;
@@ -555,6 +562,14 @@
 
       body.mobile-like .stats {
         grid-template-columns: 1fr;
+        gap: 12px;
+        padding-inline: 8px;
+      }
+
+      body.mobile-like .stats .stat {
+        width: min(100%, 34rem);
+        margin-left: auto;
+        margin-right: auto;
       }
 
       body.mobile-like .row {
