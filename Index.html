@@ -881,7 +881,16 @@
             <div class="row">
               <div>
                 <label class="label" for="intakeGrams">Intake (grams)</label>
-                <input id="intakeGrams" name="intakeGrams" class="input" type="number" min="1" step="1" required />
+                <input
+                  id="intakeGrams"
+                  name="intakeGrams"
+                  class="input"
+                  type="number"
+                  min="0.1"
+                  step="0.1"
+                  inputmode="decimal"
+                  required
+                />
               </div>
               <div>
                 <label class="label" for="proteinPer100g">Protein per 100g</label>
@@ -893,6 +902,7 @@
                   min="0"
                   max="100"
                   step="0.1"
+                  inputmode="decimal"
                   placeholder="For new foods only"
                 />
               </div>
@@ -1100,6 +1110,7 @@
         proteinDate: document.getElementById("proteinDate"),
         foodName: document.getElementById("foodName"),
         foodHint: document.getElementById("foodHint"),
+        intakeGrams: document.getElementById("intakeGrams"),
         proteinPer100g: document.getElementById("proteinPer100g"),
         foodOptions: document.getElementById("foodOptions"),
         workoutRows: document.getElementById("workoutRows"),
@@ -1139,6 +1150,8 @@
       els.navTrendBtn.addEventListener("click", () => setMobileScreen(MOBILE_SCREENS.TRENDS));
       els.navHistoryBtn.addEventListener("click", () => setMobileScreen(MOBILE_SCREENS.HISTORY));
       els.foodName.addEventListener("input", onFoodInput);
+      els.intakeGrams.addEventListener("change", normalizeProteinNumericInputs_);
+      els.proteinPer100g.addEventListener("change", normalizeProteinNumericInputs_);
       els.trainingQuick.addEventListener("click", onTrainingQuickPickClick);
       els.workoutRows.addEventListener("click", onWorkoutTableAction);
       els.proteinRows.addEventListener("click", onProteinTableAction);
@@ -1245,17 +1258,27 @@
 
       function onProteinSubmit(evt) {
         evt.preventDefault();
+        normalizeProteinNumericInputs_();
         const payload = formToObject(els.proteinForm);
         payload.profileName = state.currentProfile;
         const foodKey = normalizeKey(payload.foodName);
         const knownFood = !!state.foodLookup[foodKey];
+        const intakeGramsValue = Number(payload.intakeGrams);
+        const proteinPer100gValue = Number(payload.proteinPer100g);
+        const hasProteinInput =
+          payload.proteinPer100g !== "" && Number.isFinite(proteinPer100gValue) && proteinPer100gValue > 0;
         const editing = Number.isInteger(state.editingProteinRow);
         const fn = editing ? "updateProteinEntry" : "addProteinEntry";
         if (editing) {
           payload.rowNumber = state.editingProteinRow;
         }
 
-        if (!knownFood && !payload.proteinPer100g) {
+        if (!Number.isFinite(intakeGramsValue) || intakeGramsValue <= 0) {
+          showError(new Error("Intake grams must be greater than 0."));
+          return;
+        }
+
+        if (!knownFood && !hasProteinInput) {
           showError(new Error("New food detected. Please provide protein per 100g once."));
           return;
         }
@@ -2154,6 +2177,17 @@
         }
         rebuildFoodLookup();
         renderFoodOptions();
+      }
+
+      function normalizeProteinNumericInputs_() {
+        const intakeRaw = String(els.intakeGrams.value || "").trim();
+        if (intakeRaw) {
+          els.intakeGrams.value = intakeRaw.replace(",", ".");
+        }
+        const proteinRaw = String(els.proteinPer100g.value || "").trim();
+        if (proteinRaw) {
+          els.proteinPer100g.value = proteinRaw.replace(",", ".");
+        }
       }
 
       function onFoodInput() {
