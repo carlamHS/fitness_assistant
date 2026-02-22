@@ -43,6 +43,27 @@ The script auto-creates 3 sheets:
 4. Who has access: `Anyone with the link` (or your preferred restriction).
 5. Deploy and open the web app URL.
 
+## Mobile app icon (GitHub Pages hosting)
+Because Apps Script web apps cannot directly serve PNG icon files, host icon assets on GitHub Pages.
+
+1. In GitHub repo settings, enable Pages:
+   - `Settings > Pages`
+   - Source: `Deploy from a branch`
+   - Branch: `main`, Folder: `/(root)`
+2. Push icon assets and manifest in this repo:
+   - `assets/icons/icon-180.png`
+   - `assets/icons/icon-192.png`
+   - `assets/icons/icon-512.png`
+   - `assets/icons/favicon-32.png`
+   - `manifest.webmanifest`
+3. `Index.html` already points to:
+   - `https://carlamHS.github.io/ng_fitness_assistant/assets/icons/...`
+   - `https://carlamHS.github.io/ng_fitness_assistant/manifest.webmanifest`
+4. After re-deploying Apps Script, remove old Home Screen shortcut (if any), then add again.
+
+To regenerate icons later, run:
+- `python3 tools/generate_icons.py`
+
 ## Usage notes
 - Workout logging supports 2 modes:
   - `Strength`: reps + sets required, mass optional.
