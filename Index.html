@@ -551,7 +551,7 @@
         }
 
         .chart-canvas {
-          height: 200px;
+          height: 220px;
         }
       }
 
@@ -632,7 +632,7 @@
       }
 
       body.mobile-like .chart-canvas {
-        height: 200px;
+        height: 224px;
       }
 
       body.mobile-like .hero h1 {
@@ -914,14 +914,20 @@
 
       <section id="trendSection" class="grid app-section">
         <article class="card">
-          <h2>Weekly Protein Trend</h2>
+          <h2>Protein Trend</h2>
+          <label class="label" for="trendDaysSelect">Date range</label>
+          <select id="trendDaysSelect" class="input">
+            <option value="7">7 days</option>
+            <option value="14">14 days</option>
+            <option value="30">30 days</option>
+          </select>
           <p id="proteinTrendHint" class="hint">Last 7 days ending selected date.</p>
           <canvas id="proteinChart" class="chart-canvas"></canvas>
           <p class="chart-foot">Y-axis: grams protein</p>
         </article>
 
         <article class="card">
-          <h2>Weekly Workout Load</h2>
+          <h2>Workout Load Trend</h2>
           <label class="label" for="workoutTrendSelect">Workout for comparison</label>
           <select id="workoutTrendSelect" class="input">
             <option value="__all__">All gym work</option>
@@ -1048,6 +1054,7 @@
         entryMode: "workout",
         textScalePref: "auto",
         workoutTrendFilter: WORKOUT_FILTER_ALL,
+        trendDays: 7,
         workoutNames: [],
         recentWorkoutNames: [],
         mobileScreen: MOBILE_SCREENS.LOG,
@@ -1080,6 +1087,7 @@
         modeWorkoutBtn: document.getElementById("modeWorkoutBtn"),
         modeProteinBtn: document.getElementById("modeProteinBtn"),
         textScaleSelect: document.getElementById("textScaleSelect"),
+        trendDaysSelect: document.getElementById("trendDaysSelect"),
         workoutTrendSelect: document.getElementById("workoutTrendSelect"),
         workoutDate: document.getElementById("workoutDate"),
         training: document.getElementById("training"),
@@ -1125,6 +1133,7 @@
       els.modeWorkoutBtn.addEventListener("click", () => setEntryMode("workout"));
       els.modeProteinBtn.addEventListener("click", () => setEntryMode("protein"));
       els.textScaleSelect.addEventListener("change", onTextScaleChange);
+      els.trendDaysSelect.addEventListener("change", onTrendDaysChange);
       els.workoutTrendSelect.addEventListener("change", onWorkoutTrendFilterChange);
       els.navLogBtn.addEventListener("click", () => setMobileScreen(MOBILE_SCREENS.LOG));
       els.navTrendBtn.addEventListener("click", () => setMobileScreen(MOBILE_SCREENS.TRENDS));
@@ -1156,10 +1165,18 @@
         const preferredTextScaleRaw =
           window.localStorage.getItem("fa_text_scale") || window.localStorage.getItem("ngfa_text_scale") || "auto";
         const preferredWorkoutFilter = loadWorkoutFilterForProfile_(preferredProfile);
+        const preferredTrendDays = loadTrendDaysPreference_();
         state.workoutTrendFilter = preferredWorkoutFilter;
+        state.trendDays = preferredTrendDays;
         const preferredTextScale = isMobileLikeLayout_() ? "auto" : preferredTextScaleRaw;
         state.textScalePref = preferredTextScale;
         els.textScaleSelect.value = preferredTextScale;
+        els.trendDaysSelect.value = String(preferredTrendDays);
+        if (els.trendDaysSelect.value !== String(preferredTrendDays)) {
+          state.trendDays = 7;
+          els.trendDaysSelect.value = "7";
+        }
+        window.localStorage.setItem("fa_trend_days", String(state.trendDays));
         if (els.textScaleSelect.value !== preferredTextScale) {
           els.textScaleSelect.value = "auto";
           state.textScalePref = "auto";
@@ -1170,6 +1187,7 @@
         runServer("initApp", {
           profileName: preferredProfile,
           trainingName: getTrainingFilterForRequest_(preferredWorkoutFilter),
+          trendDays: state.trendDays,
         })
           .then((data) => {
             setBaseDates(data.today);
@@ -1284,6 +1302,13 @@
       function onWorkoutTrendFilterChange() {
         state.workoutTrendFilter = els.workoutTrendSelect.value || WORKOUT_FILTER_ALL;
         saveWorkoutFilterForProfile_(state.currentProfile, state.workoutTrendFilter);
+        refreshForSelectedDate();
+      }
+
+      function onTrendDaysChange() {
+        state.trendDays = normalizeTrendDays_(els.trendDaysSelect.value);
+        els.trendDaysSelect.value = String(state.trendDays);
+        window.localStorage.setItem("fa_trend_days", String(state.trendDays));
         refreshForSelectedDate();
       }
 
@@ -1447,6 +1472,25 @@
         return out;
       }
 
+      function normalizeTrendDays_(value) {
+        const n = Number(value);
+        if (!Number.isFinite(n)) {
+          return 7;
+        }
+        if (n >= 30) {
+          return 30;
+        }
+        if (n >= 14) {
+          return 14;
+        }
+        return 7;
+      }
+
+      function loadTrendDaysPreference_() {
+        const stored = window.localStorage.getItem("fa_trend_days") || window.localStorage.getItem("ngfa_trend_days");
+        return normalizeTrendDays_(stored);
+      }
+
       function workoutFilterStorageKey_(profileName) {
         const profileKey = normalizeKey(profileName || "default");
         return `fa_workout_filter_${profileKey || "default"}`;
@@ -1576,6 +1620,7 @@
           date: date,
           profileName: state.currentProfile,
           trainingName: getTrainingFilterForRequest_(state.workoutTrendFilter),
+          trendDays: state.trendDays,
         };
         Promise.all([runServer("getDailySnapshot", request), runServer("getWeeklyTrend", request)])
           .then(([snap, trend]) => {
@@ -1687,6 +1732,7 @@
 
       function renderTrendCharts(rows) {
         state.weeklyTrend = rows.slice();
+        const daysCount = Math.max(1, Number(state.trendDays || (rows && rows.length) || 7));
         const selectedWorkoutLabel =
           state.workoutTrendFilter === WORKOUT_FILTER_ALL ? "All gym work" : state.workoutTrendFilter;
         if (!rows.length) {
@@ -1700,7 +1746,8 @@
             fillColor: "rgba(210, 110, 29, 0.2)",
             unit: "load",
           });
-          els.volumeTrendHint.textContent = `${selectedWorkoutLabel}: no entries in selected 7-day window.`;
+          els.proteinTrendHint.textContent = `Last ${daysCount} days ending selected date (no data).`;
+          els.volumeTrendHint.textContent = `${selectedWorkoutLabel}: no entries in selected ${daysCount}-day window.`;
           return;
         }
 
@@ -1725,7 +1772,7 @@
         });
 
         const range = `${shortDate(rows[0].date)} to ${shortDate(rows[rows.length - 1].date)}`;
-        els.proteinTrendHint.textContent = `Last 7 days ending selected date (${range}).`;
+        els.proteinTrendHint.textContent = `Last ${daysCount} days ending selected date (${range}).`;
         els.volumeTrendHint.textContent = `${selectedWorkoutLabel}: daily load trend (${range}).`;
       }
 
@@ -1741,10 +1788,10 @@
         const axisFont = mobile ? "12px IBM Plex Mono" : "10px IBM Plex Mono";
         const emptyFont = mobile ? "13px Sora" : "12px Sora";
 
-        const left = 40;
-        const right = 10;
+        const left = mobile ? 52 : 42;
+        const right = mobile ? 14 : 10;
         const top = 12;
-        const bottom = 28;
+        const bottom = mobile ? 42 : 30;
         const plotWidth = Math.max(1, width - left - right);
         const plotHeight = Math.max(1, height - top - bottom);
 
@@ -1761,6 +1808,8 @@
         ctx.strokeStyle = "rgba(20, 52, 41, 0.15)";
         ctx.fillStyle = "#5c6e67";
         ctx.font = axisFont;
+        ctx.textAlign = "left";
+        ctx.textBaseline = "middle";
         for (let i = 0; i <= 4; i += 1) {
           const y = top + (plotHeight * i) / 4;
           const value = ((max * (4 - i)) / 4).toFixed(max > 25 ? 0 : 1);
@@ -1768,7 +1817,7 @@
           ctx.moveTo(left, y);
           ctx.lineTo(width - right, y);
           ctx.stroke();
-          ctx.fillText(`${value}${unit ? " " + unit : ""}`, 2, y + 3);
+          ctx.fillText(`${value}${unit ? " " + unit : ""}`, 2, y);
         }
 
         const points = series.map((p, idx) => {
@@ -1799,17 +1848,29 @@
         ctx.stroke();
 
         ctx.fillStyle = lineColor;
+        const pointRadius = series.length > 20 ? 2 : 2.8;
         points.forEach((point) => {
           ctx.beginPath();
-          ctx.arc(point.x, point.y, 2.8, 0, Math.PI * 2);
+          ctx.arc(point.x, point.y, pointRadius, 0, Math.PI * 2);
           ctx.fill();
         });
 
         ctx.fillStyle = "#4d5f58";
         ctx.font = axisFont;
-        points.forEach((point) => {
-          ctx.fillText(point.label, point.x - 14, top + plotHeight + 16);
+        ctx.textAlign = "center";
+        ctx.textBaseline = "top";
+        const desiredLabelGap = mobile ? 54 : 46;
+        const maxLabels = Math.max(2, Math.floor(plotWidth / desiredLabelGap) + 1);
+        const labelStep = Math.max(1, Math.ceil(points.length / maxLabels));
+        points.forEach((point, idx) => {
+          if (idx % labelStep !== 0 && idx !== points.length - 1) {
+            return;
+          }
+          const x = Math.max(left + 14, Math.min(width - right - 14, point.x));
+          ctx.fillText(point.label, x, top + plotHeight + 8);
         });
+        ctx.textAlign = "left";
+        ctx.textBaseline = "alphabetic";
       }
 
       function prepareCanvas(canvas) {

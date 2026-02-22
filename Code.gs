@@ -67,6 +67,7 @@ function initApp(request) {
   const profiles = listProfiles_();
   const activeProfile = resolveRequestedProfile_(request && request.profileName, profiles);
   const trainingName = normalizeTrainingNameFilter_(request && request.trainingName);
+  const trendDays = normalizeTrendDays_(request && request.trendDays);
   const workoutNames = listWorkoutNames_(activeProfile);
   const today = normalizeDateString();
   return {
@@ -84,6 +85,7 @@ function initApp(request) {
       date: today,
       profileName: activeProfile,
       trainingName: trainingName,
+      trendDays: trendDays,
     }),
   };
 }
@@ -343,9 +345,10 @@ function getWeeklyTrend(request) {
   const endDateLabel = parsed.date;
   const profileName = parsed.profileName;
   const trainingNameFilter = normalizeTrainingNameFilter_(request && request.trainingName);
+  const trendDays = normalizeTrendDays_(request && request.trendDays);
   const endDate = parseDateLabel_(endDateLabel);
   const startDate = new Date(endDate);
-  startDate.setDate(startDate.getDate() - 6);
+  startDate.setDate(startDate.getDate() - (trendDays - 1));
   const startLabel = Utilities.formatDate(startDate, tz, "yyyy-MM-dd");
 
   const proteinByDate = {};
@@ -375,7 +378,7 @@ function getWeeklyTrend(request) {
   });
 
   const out = [];
-  for (let i = 0; i < 7; i += 1) {
+  for (let i = 0; i < trendDays; i += 1) {
     const d = new Date(startDate);
     d.setDate(startDate.getDate() + i);
     const key = Utilities.formatDate(d, tz, "yyyy-MM-dd");
@@ -390,6 +393,21 @@ function getWeeklyTrend(request) {
   }
 
   return out;
+}
+
+function normalizeTrendDays_(value) {
+  const n = Number(value);
+  if (!Number.isFinite(n)) {
+    return 7;
+  }
+  const intVal = Math.floor(n);
+  if (intVal <= 7) {
+    return 7;
+  }
+  if (intVal <= 14) {
+    return 14;
+  }
+  return 30;
 }
 
 function getProteinTotals(days) {
