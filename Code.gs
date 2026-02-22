@@ -1,5 +1,5 @@
 /**
- * NG Fitness Assistant
+ * Fitness Assistant
  * Google Apps Script backend for workout and protein tracking.
  */
 
@@ -49,7 +49,7 @@ const HEADERS = Object.freeze({
 function doGet() {
   setupSheets();
   return HtmlService.createHtmlOutputFromFile("Index")
-    .setTitle("NG Fitness Assistant")
+    .setTitle("Fitness Assistant")
     .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
 }
 

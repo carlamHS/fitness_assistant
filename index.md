@@ -1,4 +1,4 @@
-# NG Fitness Assistant Assets
+# Fitness Assistant Assets
 
 GitHub Pages is live.
 
@@ -10,4 +10,3 @@ Use these hosted files in your Apps Script web app:
 - [favicon-32.png](./assets/icons/favicon-32.png)
 - [manifest.webmanifest](./manifest.webmanifest)
 - [Index.html](./Index.html)
-

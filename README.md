@@ -1,4 +1,4 @@
-# NG Fitness Assistant (Google Sheets + Apps Script)
+# Fitness Assistant (Google Sheets + Apps Script)
 
 Starter web app to:
 - Log gym training details (`training`, `mass`, `reps`, `sets`, `notes`)

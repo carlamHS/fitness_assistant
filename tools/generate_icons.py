@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Generate app icons for NG Fitness Assistant.
+Generate app icons for Fitness Assistant.
 
 Outputs:
 - assets/icons/icon-1024.png

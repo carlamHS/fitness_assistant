@@ -7,8 +7,8 @@
     <meta name="theme-color" content="#0a7a4d" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-    <meta name="apple-mobile-web-app-title" content="NG Fitness" />
-    <title>NG Fitness Assistant</title>
+    <meta name="apple-mobile-web-app-title" content="Fitness Assistant" />
+    <title>Fitness Assistant</title>
     <link rel="apple-touch-icon" sizes="180x180" href="https://carlamHS.github.io/ng_fitness_assistant/assets/icons/icon-180.png" />
     <link rel="icon" type="image/png" sizes="32x32" href="https://carlamHS.github.io/ng_fitness_assistant/assets/icons/favicon-32.png" />
     <link rel="icon" type="image/png" sizes="192x192" href="https://carlamHS.github.io/ng_fitness_assistant/assets/icons/icon-192.png" />
@@ -684,7 +684,7 @@
     <main class="wrap">
       <section id="heroSection" class="hero">
         <div>
-          <h1>NG Fitness Assistant</h1>
+          <h1>Fitness Assistant</h1>
           <p class="sub">Track workouts and protein intake in one sheet-backed dashboard.</p>
         </div>
         <div class="review-date">
@@ -1096,13 +1096,18 @@
 
       function init() {
         updateMobileLikeMode();
-        const preferredProfile = window.localStorage.getItem("ngfa_profile") || "";
-        const preferredMode = window.localStorage.getItem("ngfa_entry_mode") || "workout";
+        const preferredProfile =
+          window.localStorage.getItem("fa_profile") || window.localStorage.getItem("ngfa_profile") || "";
+        const preferredMode =
+          window.localStorage.getItem("fa_entry_mode") || window.localStorage.getItem("ngfa_entry_mode") || "workout";
         const preferredScreen = normalizeMobileScreen_(
-          window.localStorage.getItem("ngfa_mobile_screen") || MOBILE_SCREENS.LOG
+          window.localStorage.getItem("fa_mobile_screen") ||
+            window.localStorage.getItem("ngfa_mobile_screen") ||
+            MOBILE_SCREENS.LOG
         );
         state.mobileScreen = preferredScreen;
-        const preferredTextScaleRaw = window.localStorage.getItem("ngfa_text_scale") || "auto";
+        const preferredTextScaleRaw =
+          window.localStorage.getItem("fa_text_scale") || window.localStorage.getItem("ngfa_text_scale") || "auto";
         const preferredWorkoutFilter = loadWorkoutFilterForProfile_(preferredProfile);
         state.workoutTrendFilter = preferredWorkoutFilter;
         const preferredTextScale = isMobileLikeLayout_() ? "auto" : preferredTextScaleRaw;
@@ -1112,7 +1117,7 @@
           els.textScaleSelect.value = "auto";
           state.textScalePref = "auto";
         }
-        window.localStorage.setItem("ngfa_text_scale", state.textScalePref);
+        window.localStorage.setItem("fa_text_scale", state.textScalePref);
         applyTextScale_();
         applyMobileScreenLayout_();
         runServer("initApp", {
@@ -1215,13 +1220,13 @@
         const selected = state.profiles.includes(activeProfile) ? activeProfile : state.profiles[0];
         state.currentProfile = selected;
         els.profileSelect.value = selected;
-        window.localStorage.setItem("ngfa_profile", selected);
+        window.localStorage.setItem("fa_profile", selected);
         applyThemeForProfile_(selected);
       }
 
       function onProfileChange() {
         state.currentProfile = els.profileSelect.value || "Default";
-        window.localStorage.setItem("ngfa_profile", state.currentProfile);
+        window.localStorage.setItem("fa_profile", state.currentProfile);
         applyThemeForProfile_(state.currentProfile);
         state.workoutTrendFilter = loadWorkoutFilterForProfile_(state.currentProfile);
         cancelWorkoutEdit(true);
@@ -1237,7 +1242,7 @@
 
       function setEntryMode(modeInput) {
         state.entryMode = modeInput === "protein" ? "protein" : "workout";
-        window.localStorage.setItem("ngfa_entry_mode", state.entryMode);
+        window.localStorage.setItem("fa_entry_mode", state.entryMode);
         els.modeWorkoutBtn.classList.toggle("active", state.entryMode === "workout");
         els.modeProteinBtn.classList.toggle("active", state.entryMode === "protein");
         applyEntryModeVisibility();
@@ -1256,7 +1261,7 @@
 
       function setMobileScreen(screenInput) {
         state.mobileScreen = normalizeMobileScreen_(screenInput);
-        window.localStorage.setItem("ngfa_mobile_screen", state.mobileScreen);
+        window.localStorage.setItem("fa_mobile_screen", state.mobileScreen);
         applyMobileScreenLayout_();
         applyEntryModeVisibility();
         if (isMobileLikeLayout_()) {
@@ -1395,11 +1400,25 @@
 
       function workoutFilterStorageKey_(profileName) {
         const profileKey = normalizeKey(profileName || "default");
+        return `fa_workout_filter_${profileKey || "default"}`;
+      }
+
+      function legacyWorkoutFilterStorageKey_(profileName) {
+        const profileKey = normalizeKey(profileName || "default");
         return `ngfa_workout_filter_${profileKey || "default"}`;
       }
 
       function loadWorkoutFilterForProfile_(profileName) {
-        const stored = window.localStorage.getItem(workoutFilterStorageKey_(profileName));
+        const storageKey = workoutFilterStorageKey_(profileName);
+        const stored = window.localStorage.getItem(storageKey);
+        if (stored) {
+          return stored;
+        }
+        const legacyStored = window.localStorage.getItem(legacyWorkoutFilterStorageKey_(profileName));
+        if (legacyStored) {
+          window.localStorage.setItem(storageKey, legacyStored);
+          return legacyStored;
+        }
         return stored || WORKOUT_FILTER_ALL;
       }
 
@@ -1417,7 +1436,7 @@
       function onTextScaleChange() {
         const pref = String(els.textScaleSelect.value || "auto");
         state.textScalePref = pref;
-        window.localStorage.setItem("ngfa_text_scale", pref);
+        window.localStorage.setItem("fa_text_scale", pref);
         applyTextScale_();
       }
 

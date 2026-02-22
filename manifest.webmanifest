@@ -1,6 +1,6 @@
 {
-  "name": "NG Fitness Assistant",
-  "short_name": "NG Fitness",
+  "name": "Fitness Assistant",
+  "short_name": "Fitness Assistant",
   "description": "Track workouts and protein intake.",
   "start_url": ".",
   "display": "standalone",
